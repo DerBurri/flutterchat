@@ -1,0 +1,32 @@
+schemaVersion: v0.2
+prepare:
+  steps:
+    - name: Prepare Flutter Environment
+      command: nix-env -i -f ~/app/configuration.nix
+    - name: Build Flutter Web App
+      command: cd /home/user/app/my_app/ && flutter clean && flutter build web
+    - name: Build Backend
+      command: cd /home/user/app/backend/ && go build -o chatBackend
+test:
+  steps: []
+run:
+  frontend-1:
+    steps:
+      - name: Run Webserver
+        command: cd /home/user/app/my_app/build/web && python3 -m http.server 3000
+    plan: 8
+    replicas: 1
+    isPublic: true
+    network:
+      path: /
+      stripPath: false
+  backend-1:
+    steps:
+      - name: Run Backend
+        command: cd /home/user/app/backend/ && ./chatBackend
+    plan: 8
+    replicas: 1
+    isPublic: true
+    network:
+      path: /backend
+      stripPath: false
